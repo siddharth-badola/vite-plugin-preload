@@ -16,7 +16,8 @@
     "build": "tsup",
     "pretest": "yarn build",
     "test": "vitest",
-    "prepack": "yarn build"
+    "prepack": "yarn build",
+    "preinstall": "yarn build"
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
