@@ -17,7 +17,7 @@
     "pretest": "yarn build",
     "test": "vitest",
     "prepack": "yarn build",
-    "preinstall": "yarn install && yarn build"
+    "preinstall": "yarn install --ignore-scripts && yarn build"
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
