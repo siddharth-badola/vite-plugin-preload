@@ -1,5 +1,4 @@
 import { defaultOptions, PreloadOptions } from "./options";
-import { createFilter } from "@rollup/pluginutils";
 import { Plugin, ResolvedConfig } from "vite";
 import {
   appendToDom,
@@ -9,31 +8,7 @@ import {
   getExistingLinks,
 } from "./dom-utils";
 import prettier from "prettier";
-import type { OutputBundle, OutputChunk } from "rollup";
-
-const jsFilter = createFilter(["**/*-*.js"]);
-const cssFilter = createFilter(["**/*-*.css"]);
-
-const addStaticImportToPreoadModules = (
-  bundles: OutputBundle,
-  fileName: string,
-  pathTransform?: (fileName: string) => string
-) => {
-  const paths: Array<string> = [];
-  const imports =
-    bundles[fileName].type === "chunk"
-      ? (bundles[fileName] as OutputChunk).imports
-      : [];
-
-  imports.forEach((fileName) => {
-    if (bundles[fileName].type === "chunk" && jsFilter(fileName))
-      paths.push(
-        typeof pathTransform === "function" ? pathTransform(fileName) : fileName
-      );
-  });
-
-  return paths;
-};
+import { addStaticImportToPreoadModules, jsFilter, cssFilter } from "./utils";
 
 export default function VitePluginPreloadAll(
   options?: Partial<PreloadOptions>
@@ -78,15 +53,21 @@ export default function VitePluginPreloadAll(
             bundle.type === "chunk" &&
             jsFilter(bundle.fileName)
           ) {
-            if (mergedOptions.preloadStaticImportForChunks)
-              addStaticImportToPreoadModules(
+            if (mergedOptions.preloadStaticImportForChunks) {
+              const [jsLinks, cssLinks] = addStaticImportToPreoadModules(
                 ctx.bundle,
                 bundle.fileName,
                 getRelativePath
-              ).forEach((path) => {
+              );
+              jsLinks.forEach((path) => {
                 if (!existingLinks.includes(path))
                   additionalModulesSet.add(path);
               });
+              cssLinks.forEach((path2) => {
+                if (!existingLinks.includes(path2))
+                  additionalStylesheetsSet.add(path2);
+              });
+            }
 
             additionalModulesSet.add(path);
           }
@@ -96,7 +77,7 @@ export default function VitePluginPreloadAll(
             bundle.type === "asset" &&
             cssFilter(bundle.fileName)
           ) {
-            additionalModulesSet.add(path);
+            additionalStylesheetsSet.add(path);
           }
         }
 
@@ -104,7 +85,7 @@ export default function VitePluginPreloadAll(
           (a, z) => a.localeCompare(z)
         );
 
-        const additionalStylesheets = Array.from(additionalModulesSet).sort(
+        const additionalStylesheets = Array.from(additionalStylesheetsSet).sort(
           (a, z) => a.localeCompare(z)
         );
 
