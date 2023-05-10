@@ -13,7 +13,7 @@
   "license": "MIT",
   "scripts": {
     "clean": "del dist \"./examples/*/dist/\" \"./examples/*/node_modules/\"",
-    "build": "tsup",
+    "build": "tsup src/index.ts",
     "pretest": "yarn build",
     "test": "vitest",
     "prepack": "yarn build",
