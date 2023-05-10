@@ -25,9 +25,12 @@ export const getRelatedCssLinks = (
 
   if (importedCss.size) {
     importedCss.forEach((fileName) => {
-      cssLinks.push(
-        typeof pathTransform === "function" ? pathTransform(fileName) : fileName
-      );
+      if (bundles[fileName].type === "asset" && cssFilter(fileName))
+        cssLinks.push(
+          typeof pathTransform === "function"
+            ? pathTransform(fileName)
+            : fileName
+        );
     });
   }
 

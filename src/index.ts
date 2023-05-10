@@ -8,7 +8,7 @@ import {
   getExistingLinks,
 } from "./dom-utils";
 import prettier from "prettier";
-import { addStaticImportToPreoadModules, jsFilter } from "./utils";
+import { addStaticImportToPreoadModules, jsFilter, cssFilter } from "./utils";
 
 export default function VitePluginPreloadAll(
   options?: Partial<PreloadOptions>
@@ -72,7 +72,11 @@ export default function VitePluginPreloadAll(
             additionalModulesSet.add(path);
           }
 
-          if (mergedOptions.includeCss && bundle.type === "asset") {
+          if (
+            mergedOptions.includeCss &&
+            bundle.type === "asset" &&
+            cssFilter(bundle.fileName)
+          ) {
             additionalStylesheetsSet.add(path);
           }
         }
